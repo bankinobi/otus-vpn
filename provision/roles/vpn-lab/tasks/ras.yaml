@@ -1,0 +1,65 @@
+---
+- name: Symlink easyrsa binary to PATH
+  file:
+    src: /usr/share/easy-rsa/3.0.8/easyrsa
+    dest: /usr/bin/easyrsa
+    state: link
+
+- name: Copy RAS server files
+  copy:
+   src: "files/{{ item.name }}"
+   dest: "{{ item.dest }}"
+   mode: "{{ item.mode | default('0644') }}"
+  loop:
+    - {name: static.key ,dest: /etc/openvpn/server/static.key, mode: "0600"}
+    - {name: vars, dest: /usr/share/easy-rsa/3.0.8/vars}
+
+- name: Create client-config-dir directory
+  file:
+    path: /etc/openvpn/ccd
+    state: directory
+
+- name: Register if openvpn pki files exists
+  find:
+    paths: 
+      - "/etc/openvpn/server/pki/"
+  register: pkiDir
+
+- name: Create openvpn server keys
+  shell: |
+    easyrsa init-pki
+    easyrsa build-ca nopass
+    easyrsa gen-dh
+    easyrsa build-server-full server nopass
+    easyrsa build-client-full client nopass
+  args:
+    chdir: /etc/openvpn/server
+  when: pkiDir.matched == 0
+
+- name: Template openvpn server config
+  template:
+    src: ras-server.conf.j2
+    dest: /etc/openvpn/server/server.conf
+  notify: restart openvpn server
+
+- name: Load files for client template
+  slurp:
+    src: "/etc/openvpn/server/{{ item }}"
+  register: pki_files
+  with_items:
+    - pki/issued/client.crt
+    - pki/private/client.key
+    - pki/ca.crt
+    - static.key
+
+- name: Template openvpn client config
+  template:
+    src: ras-client.conf.j2
+    dest: /vagrant/client.conf
+
+- name: Fetch client.conf
+  fetch:
+    become: yes
+    src: /vagrant/client.conf
+    dest: "{{ playbook_dir }}/client.conf"
+    flat: yes

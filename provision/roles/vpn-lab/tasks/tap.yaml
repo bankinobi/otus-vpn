@@ -1,0 +1,20 @@
+---
+- name: Copy openvpn server files
+  copy:
+    src: "files/{{ item.name }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {name: tap-server.conf, dest: /etc/openvpn/server/server.conf}
+    - {name: static.key, dest: /etc/openvpn/server/static.key}
+  when: '"Server" in inventory_hostname'
+  notify: restart openvpn server
+
+- name: Copy openvpn client files
+  copy:
+    src: "files/{{ item.name }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {name: tap-client.conf, dest: /etc/openvpn/client/client.conf}
+    - {name: static.key, dest: /etc/openvpn/client/static.key}
+  when: '"Client" in inventory_hostname'
+  notify: restart openvpn client

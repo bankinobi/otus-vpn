@@ -1,0 +1,22 @@
+---
+- name: install epel repo
+  yum:
+    name: epel-release
+    state: present 
+
+- name: Install packages
+  yum:
+    name: "{{ packages }}"
+    state: present
+
+- name: Include tun tasks
+  include_tasks: tun.yaml
+  when: '"tun" in inventory_hostname'
+
+- name: Include tap tasks
+  include_tasks: tap.yaml
+  when: '"tap" in inventory_hostname'
+
+- name: Include ras tasks
+  include_tasks: ras.yaml
+  when: '"ras" in inventory_hostname'

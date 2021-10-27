@@ -1,0 +1,41 @@
+tls-client
+proto udp
+dev tun
+topology subnet
+
+remote {{ ansible_eth1.ipv4.address }}
+port 1194
+cd /etc/openvpn
+pull
+
+tls-client
+tls-auth ta.key 1
+keepalive 10 120
+comp-lzo
+persist-key
+persist-tun
+ping-timer-rem
+cipher AES-256-CBC
+
+user nobody
+group nobody
+
+status /var/run/openvpn-status.log
+log-append /var/log/openvpn/openvpn.log
+verb 3
+
+<ca>
+{{ pki_files.results | selectattr('item', 'equalto', 'pki/ca.crt') | map(attribute='content') | list | b64decode -}}
+</ca>
+
+<tls-auth>
+{{ pki_files.results | selectattr('item', 'equalto', 'static.key') | map(attribute='content') | list | b64decode }}
+</tls-auth>
+
+<cert>
+{{ pki_files.results | selectattr('item', 'equalto', 'pki/issued/client.crt') | map(attribute='content') | list | b64decode -}}
+</cert>
+
+<key>
+{{ pki_files.results | selectattr('item', 'equalto', 'pki/private/client.key') | map(attribute='content') | list | b64decode -}}
+</key>

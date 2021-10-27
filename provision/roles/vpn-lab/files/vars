@@ -1,0 +1,9 @@
+set_var EASYRSA_REQ_COUNTRY "RU"
+set_var EASYRSA_REQ_PROVINCE "Province"
+set_var EASYRSA_REQ_CITY "City"
+set_var EASYRSA_REQ_ORG "OtusHW"
+set_var EASYRSA_REQ_EMAIL "adm@otus.ru"
+set_var EASYRSA_REQ_OU "Test"
+set_var EASYRSA_REQ_CN "OHW"
+set_var EASYRSA_KEY_SIZE 2048
+set_var EASYRSA_BATCH "Yes"

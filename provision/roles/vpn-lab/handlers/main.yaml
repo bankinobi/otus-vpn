@@ -1,0 +1,12 @@
+---
+- name: restart openvpn server
+  service:
+   name: openvpn-server@server.service
+   state: restarted
+   enabled: true
+
+- name: restart openvpn client
+  service:
+   name: openvpn-client@client.service
+   state: restarted
+   enabled: true

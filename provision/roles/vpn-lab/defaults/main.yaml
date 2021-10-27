@@ -1,0 +1,6 @@
+packages:
+  - openvpn
+  - easy-rsa
+  - wget
+  - iperf
+  - tcpdump
